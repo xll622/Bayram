@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dijital Bayramlaşma v1.0</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(circle, #2c3e50, #000000);
+            font-family: 'Courier New', Courier, monospace; /* Retro oyun havası için */
+            color: #fff;
+            overflow: hidden; /* Telefon kaydırmasını engelle */
+            user-select: none; /* Metin seçmeyi engelle */
+        }
+
+        /* Oyun Alanı */
+        #game-area {
+            position: relative;
+            width: 90%;
+            height: 70vh;
+            border: 4px solid #f1c40f;
+            border-radius: 20px;
+            background-color: rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+        }
+
+        /* Yaşlı Amca Emojisi (Hareket Edecek) */
+        #amca {
+            font-size: 80px;
+            position: absolute;
+            cursor: pointer;
+            transition: all 0.2s ease-out; /* Düzgün hareket için */
+            transform: translate(-50%, -50%); /* Merkezi konumlandırma */
+            filter: drop-shadow(0 0 10px rgba(241, 196, 15, 0.7));
+        }
+
+        /* Başlık ve Mesajlar */
+        h1 { font-size: 1.5rem; color: #f1c40f; text-shadow: 2px 2px #c0392b; margin-bottom: 5px;}
+        p#instruction { font-size: 1rem; margin-top: 0; color: #ecf0f1; }
+        
+        /* Sonuç Ekranı (Başta Gizli) */
+        #result-screen {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            animation: popIn 0.5s ease;
+        }
+
+        #result-emoji { font-size: 120px; }
+        #result-text { font-size: 1.5rem; font-weight: bold; margin: 20px; text-align: center; }
+        
+        .btn {
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            background-color: #f1c40f;
+            color: #2c3e50;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 5px #c0392b;
+        }
+        .btn:active { box-shadow: 0 2px #c0392b; transform: translateY(3px); }
+
+        /* Animasyonlar */
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            80% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            /* ... (Kısa sallanma efekti) */
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>GELENEKSEL EL ÖPME SİMÜLATÖRÜ</h1>
+    <p id="instruction">Amcanın elini yakala, harçlığı kap!</p>
+
+    <div id="game-area">
+        <div id="amca">👴</div> </div>
+
+    <div id="result-screen">
+        <div id="result-emoji">💰</div>
+        <div id="result-text">HEYYO! Amca pes etti! <br> Harçlığın yolda... <br> (Yani, umarım.)</div>
+        <button class="btn" onclick="resetGame()">Tekrar Bayramlaş</button>
+    </div>
+
+    <script>
+        const amca = document.getElementById('amca');
+        const gameArea = document.getElementById('game-area');
+        const resultScreen = document.getElementById('result-screen');
+        const resultEmoji = document.getElementById('result-emoji');
+        const resultText = document.getElementById('result-text');
+
+        let isGameOver = false;
+
+        // Amcayı rastgele bir yere ışınlama fonksiyonu
+        function moveAmca() {
+            if (isGameOver) return;
+
+            const areaWidth = gameArea.clientWidth;
+            const areaHeight = gameArea.clientHeight;
+            const amcaSize = 80; // Emoji boyutu
+
+            // Rastgele X ve Y koordinatları (Alan içinde kalacak şekilde)
+            const randomX = Math.random() * (areaWidth - amcaSize) + amcaSize / 2;
+            const randomY = Math.random() * (areaHeight - amcaSize) + amcaSize / 2;
+
+            amca.style.left = `${randomX}px`;
+            amca.style.top = `${randomY}px`;
+        }
+
+        // Amca her yarım saniyede bir kaçsın (Telefon için ideal hız)
+        let amcaTimer = setInterval(moveAmca, 600); 
+
+        // Amcaya tıklandığında (el öpüldüğünde)
+        amca.addEventListener('touchstart', (e) => {
+            e.preventDefault(); // Telefon efektlerini engelle
+            endGame(true);
+        });
+
+        // Alternatif: Mouse ile tıklama (Test için)
+        amca.addEventListener('click', () => {
+            endGame(true);
+        });
+
+        function endGame(success) {
+            isGameOver = true;
+            clearInterval(amcaTimer);
+            
+            // Komik sonuç senaryoları (Daha da çeşitlendirilebilir)
+            const scenarios = [
+                { emoji: '👴🚫', text: 'Amca: "Öptürmem! Sosyal mesafe!"' },
+                { emoji: '🍬', text: 'Amca: "Harçlık bitti ama al bir bayram şekeri..."' },
+                { emoji: '🤨', text: 'Amca: "Sen kimin oğlusun/kızısın bakayım?"' },
+                { emoji: '🤑', text: 'TEBRİKLER! En yüksek el öpme hızıyla IBAN\'ını gönder!' }
+            ];
+
+            const randomScenario = scenarios[Math.floor(Math.random() * scenarios.length)];
+
+            resultEmoji.innerText = randomScenario.emoji;
+            resultText.innerHTML = randomScenario.text;
+            resultScreen.style.display = 'flex';
+        }
+
+        function resetGame() {
+            isGameOver = false;
+            resultScreen.style.display = 'none';
+            moveAmca();
+            amcaTimer = setInterval(moveAmca, 600);
+        }
+
+        // İlk açılışta amcayı yerleştir
+        moveAmca();
+    </script>
+</body>
+</html>
